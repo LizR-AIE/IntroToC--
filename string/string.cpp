@@ -11,13 +11,13 @@ string::string()
 string::string(const char * a_data)
 {
 	// SET length to be that of a_data
-	length = strlen(a_data);
+	length = Length(a_data);
 	// + 1 for null terminator
 	allocatedMemory = length + 1;
 	// ASSIGN memory
-	data = new char[length]; 
+	data = new char[allocatedMemory];
 	// copy over the data from the passed in argument to this
-	strcpy(data, a_data);
+	Copy(data, a_data);
 }
 
 string::~string()
@@ -64,9 +64,9 @@ bool string::EqualTo(string & a_other)
 void string::Append(string & a_other)
 {
 	// temp char[] for the current string
-	char * temp = new char[length];
+	char * temp = new char[allocatedMemory];
 	// copy it over
-	strcpy(temp, data);
+	Copy(temp, data);
 	// delete old memory
 	delete[] data;
 	// increase length based on the other length
@@ -74,21 +74,21 @@ void string::Append(string & a_other)
 	// set allocated memory to length + 1 (null-terminator)
 	allocatedMemory = length + 1;
 	// remake the memory with enough length
-	data = new char[length];
+	data = new char[allocatedMemory];
 	// copy over the old data
-	strcpy(data, temp);
+	Copy(data, temp);
 	// delete the old temp memory
 	delete[] temp;
 	// append the other data
-	strcat(data, a_other.data);
+	ConCat(data, a_other.data);
 }
 
 void string::Prepend(string & a_other)
 {
 	// temp char[] for the current string
-	char * temp = new char[length];
+	char * temp = new char[allocatedMemory];
 	// copy it over
-	strcpy(temp, data);
+	Copy(temp, data);
 	// delete old memory
 	delete[] data;
 	// increase length based on the other length
@@ -96,11 +96,11 @@ void string::Prepend(string & a_other)
 	// set allocated memory to length + 1 (null-terminator)
 	allocatedMemory = length + 1;
 	// remake the memory with enough length
-	data = new char[length];
+	data = new char[allocatedMemory];
 	// copy over the other data
-	strcpy(data, a_other.data);
+	Copy(data, a_other.data);
 	// concatenate the original data
-	strcat(data, temp);
+	ConCat(data, temp);
 	// delete the old temp memory
 	delete[] temp;
 }
@@ -121,6 +121,7 @@ void string::ToLower()
 
 void string::ToUpper()
 {
+	
 	for (unsigned int i = 0; i < length; i++)
 	{
 		if (data[i] >= 95 && data[i] <= 122)
@@ -150,12 +151,14 @@ void string::ReadFromConsole()
 
 void string::WriteToConsole()
 {
+	if (data == nullptr)
+		return;
 	std::cout << data;
 }
 
 bool string::operator==(const char & a_other)
 {
-	int result = strcmp(data, &a_other);
+	int result = Compare(data, &a_other);
 	if (result == 0)
 		return true;
 	return false;
@@ -166,7 +169,7 @@ bool string::operator==(string & a_other)
 	return *this == *a_other.data;
 }
 
-void string::operator=(const char * a_other)
+void string::operator=(const char & a_other)
 {
 	// delete old data if it's there
 	if (data != nullptr)
@@ -175,18 +178,18 @@ void string::operator=(const char * a_other)
 	}
 
 	// set the length and allocated memory
-	length = strlen(a_other);
+	length = Length(&a_other);
 	allocatedMemory = length + 1;
 	
 	// create the memory for the new data
-	data = new char[length];
+	data = new char[allocatedMemory];
 	
-	strcpy(data, a_other);
+	Copy(data, &a_other);
 }
 
-void string::operator=(string * a_other)
+void string::operator=(string & a_other)
 {
-	*this = a_other->data;
+	*this = *a_other.data;
 }
 
 string & string::operator+(const char & a_other)
@@ -217,4 +220,74 @@ char * string::operator[](unsigned int a_index)
 	if (a_index < 0 || a_index >= length)
 		return nullptr;
 	return &data[a_index];
+}
+
+int string::Length(const char * a_str)
+{
+	int index = 0;
+	while (a_str[index] != 0)
+	{
+		index++;
+	}
+	return index;
+}
+
+void string::Copy(char *& a_dest, const char * a_src)
+{
+	int destL = Length(a_dest);
+	int srcL  = Length(a_src);
+
+	if (destL == srcL)
+	{
+		for (int i = 0; i <= destL; i++)
+		{
+			a_dest[i] = a_src[i];
+		}
+	}
+	else
+	{
+		delete[] a_dest;
+		a_dest = new char[srcL + 1];
+		for (int i = 0; i <= srcL; i++)
+		{
+			a_dest[i] = a_src[i];
+		}
+	}
+}
+
+void string::ConCat(char * a_dest, const char * a_src)
+{
+	char * temp = new char[Length(a_dest) + 1];
+	for (int i = 0; i <= Length(a_dest); i++)
+	{
+		temp[i] = a_dest[i];
+	}
+	delete a_dest;
+	a_dest = new char[Length(temp) + Length(a_src) + 1];
+	for (int i = 0; i <= Length(temp) + Length(a_src); i++)
+	{
+		if (i < Length(temp))
+		{
+			a_dest[i] = temp[i];
+		}
+		else
+		{
+			a_dest[i] = a_src[i];
+		}
+	}
+}
+
+bool string::Compare(const char * a_str1, const char * a_str2)
+{
+	return false;
+}
+
+void string::Resize(char * a_str, int a_size)
+{
+
+}
+
+void string::WriteToConsole(char * a_str)
+{
+	std::cout << a_str;
 }
